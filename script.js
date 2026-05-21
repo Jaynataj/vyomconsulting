@@ -46,18 +46,31 @@ const observer = new IntersectionObserver((entries) => {
 
 fadeEls.forEach(el => observer.observe(el));
 
-// Form submission
-document.getElementById('applyForm').addEventListener('submit', (e) => {
+// Form submission — posts to Netlify Forms
+document.getElementById('applyForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const btn = e.target.querySelector('button[type="submit"]');
-  btn.textContent = 'Application Submitted ✓';
-  btn.style.background = '#2a7a5c';
-  btn.style.cursor = 'default';
+  const form = e.target;
+  const btn = form.querySelector('button[type="submit"]');
+  btn.textContent = 'Sending...';
   btn.disabled = true;
-  e.target.querySelectorAll('input, select, textarea').forEach(field => {
-    field.disabled = true;
-    field.style.opacity = '0.5';
-  });
+
+  const data = new URLSearchParams(new FormData(form)).toString();
+  try {
+    await fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: data,
+    });
+    btn.textContent = 'Application Submitted ✓';
+    btn.style.background = '#2a7a5c';
+    form.querySelectorAll('input, select, textarea').forEach(f => {
+      f.disabled = true;
+      f.style.opacity = '0.5';
+    });
+  } catch {
+    btn.textContent = 'Submit Your Application';
+    btn.disabled = false;
+  }
 });
 
 // Smooth active nav link highlighting
